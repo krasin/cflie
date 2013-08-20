@@ -52,14 +52,8 @@ func main() {
 	if err != nil {
 		log.Fatal("SetRateAndChannel: %v", err)
 	}
-	odd := true
 	for {
-		if odd {
-			_, err = dev.Write([]byte{0xFF, 0xFF, 0x10})
-		} else {
-			_, err = dev.Write([]byte{0xFF})
-		}
-		odd = !odd
+		_, err = dev.Write([]byte{0xFF, 0xFF, 0x10})
 		if err != nil {
 			log.Printf("write: %v", err)
 			continue
