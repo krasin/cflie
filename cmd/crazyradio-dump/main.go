@@ -24,14 +24,17 @@ const (
 	CMD_WRITE_FLASH  = 0x18
 	CMD_FLASH_STATUS = 0x19
 	CMD_READ_FLASH   = 0x1C
+
+	PageNum  = 128
+	PageSize = 1024
 )
 
 func main() {
 	flag.Parse()
 
 	got := make(map[int]bool)
-	mem := make([]byte, 128*1024)
-	buf := make([]byte, 128)
+	mem := make([]byte, PageNum*PageSize)
+	buf := make([]byte, PageNum)
 
 	list, err := usb.ListDevices()
 	if err != nil {
@@ -88,12 +91,12 @@ func main() {
 
 	log.Printf("Downloading the contents of Crazyflie Flash memory...")
 	for try := 0; try < 10; try++ {
-		for page := uint16(0); page < 128; page++ {
+		for page := uint16(0); page < PageNum; page++ {
 			if try == 0 {
 				fmt.Fprintf(os.Stderr, ".")
 			}
-			for offset := uint16(0); offset < 1024; offset += 16 {
-				start := int(page)*1024 + int(offset)
+			for offset := uint16(0); offset < PageSize; offset += 16 {
+				start := int(page)*PageSize + int(offset)
 				if got[start] {
 					// Do not request already received chunks
 					continue
@@ -122,7 +125,7 @@ func main() {
 					offset := uint16(p[5]) + (uint16(p[6]) << 8)
 					data := p[7 : 7+16]
 					// log.Printf("ReadFlashResponse: page: %d, offset: %d, data: %v", page, offset, data)
-					start := int(page)*1024 + int(offset)
+					start := int(page)*PageSize + int(offset)
 					copy(mem[start:start+16], data)
 					got[start] = true
 				}
@@ -131,9 +134,9 @@ func main() {
 	}
 
 	missing := false
-	for page := uint16(0); page < 128; page++ {
-		for offset := uint16(0); offset < 1024; offset += 16 {
-			start := int(page)*1024 + int(offset)
+	for page := uint16(0); page < PageNum; page++ {
+		for offset := uint16(0); offset < PageSize; offset += 16 {
+			start := int(page)*PageSize + int(offset)
 			if !got[start] {
 				log.Printf("Missing chunk: start=%d", start)
 				missing = true
