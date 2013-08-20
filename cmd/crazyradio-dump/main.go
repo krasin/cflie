@@ -4,6 +4,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	//"time"
@@ -138,14 +139,9 @@ func main() {
 	if missing {
 		os.Exit(1)
 	}
-	log.Printf("OK")
-	f, err := os.OpenFile(*output, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		log.Fatal(err)
+	fmt.Fprintf(os.Stderr, "\n")
+	if err = ioutil.WriteFile(*output, mem, 0644); err != nil {
+		log.Fatalf("Unable to dump memory to file %s: %v", *output, err)
 	}
-	defer f.Close()
-	_, err = f.Write(mem)
-	if err != nil {
-		log.Fatal("Unable to dump mem to stdout: ", err)
-	}
+	log.Printf("OK - Memory dump saved to %s", *output)
 }
