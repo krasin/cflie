@@ -13,6 +13,7 @@ import (
 )
 
 var output = flag.String("output", "cflie.dump", "Output file")
+var verbose = flag.Bool("v", false, "Verbosity")
 
 const BootloaderChannel = 110
 
@@ -52,6 +53,8 @@ func main() {
 	if err != nil {
 		log.Fatal("SetRateAndChannel: %v", err)
 	}
+
+	log.Printf("Connecting to bootloader, please, restart Crazyflie...")
 	for {
 		_, err = dev.Write([]byte{0xFF, 0xFF, 0x10})
 		if err != nil {
@@ -64,11 +67,16 @@ func main() {
 			continue
 		}
 		if n <= 1 {
-			fmt.Fprintf(os.Stderr, ".")
+			if *verbose {
+				fmt.Fprintf(os.Stderr, ".")
+			}
 			continue
 		}
 		// We're connected!
 		break
+	}
+	if *verbose {
+		fmt.Fprintf(os.Stderr, "\n")
 	}
 	log.Printf("Connected to bootloader")
 
@@ -77,6 +85,8 @@ func main() {
 			byte(page & 0xFF), byte((page >> 8) & 0xFF),
 			byte(offset & 0xFF), byte((offset >> 8) & 0xFF)}
 	}
+
+	log.Printf("Downloading the contents of Crazyflie Flash memory...")
 	for try := 0; try < 10; try++ {
 		for page := uint16(0); page < 128; page++ {
 			if try == 0 {
