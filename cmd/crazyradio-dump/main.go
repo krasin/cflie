@@ -119,12 +119,10 @@ func main() {
 					continue
 				}
 				p := buf[1:n]
-				// log.Printf("Packet: %v", p)
 				if len(p) > 10 && p[2] == CMD_READ_FLASH {
 					page := uint16(p[3]) + (uint16(p[4]) << 8)
 					offset := uint16(p[5]) + (uint16(p[6]) << 8)
 					data := p[7 : 7+16]
-					// log.Printf("ReadFlashResponse: page: %d, offset: %d, data: %v", page, offset, data)
 					start := int(page)*PageSize + int(offset)
 					copy(mem[start:start+16], data)
 					got[start] = true
