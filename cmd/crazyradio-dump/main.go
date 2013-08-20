@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	//"time"
 
 	"github.com/samofly/crazyradio"
 	"github.com/samofly/crazyradio/usb"
@@ -64,19 +63,14 @@ func main() {
 			log.Printf("read: n: %d, err: %v", n, err)
 			continue
 		}
-		if n == 1 {
-			if buf[0] == 0 {
-				// Empty packet, compact log
-				fmt.Fprintf(os.Stderr, ".")
-				continue
-			}
-			log.Printf("Strange packet: %v", buf[:n])
+		if n <= 1 {
+			fmt.Fprintf(os.Stderr, ".")
 			continue
 		}
-		log.Printf("Packet: %v", buf[:n])
 		// We're connected!
 		break
 	}
+	log.Printf("Connected to bootloader")
 
 	readFlash := func(page uint16, offset uint16) []byte {
 		return []byte{0xFF, 0xFF, CMD_READ_FLASH,
